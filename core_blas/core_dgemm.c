@@ -14,6 +14,12 @@
 #include "plasma_types.h"
 #include "core_lapack.h"
 
+#if defined(BLASFEO)
+#include "blasfeo_target.h"
+#include "blasfeo_common.h"
+#include "blasfeo_d_aux.h"
+#include "blasfeo_d_blas.h"
+#endif
 /***************************************************************************//**
  *
  * @ingroup core_gemm
@@ -93,12 +99,42 @@ void core_dgemm(plasma_enum_t transa, plasma_enum_t transb,
                                           const double *B, int ldb,
                 double beta,        double *C, int ldc)
 {
+#if defined(BLASFEO)
+	if(transa==PlasmaNoTrans)
+		{
+		if(transb==PlasmaNoTrans)
+			{
+			struct d_strmat sA;
+			struct d_strmat sB;
+			struct d_strmat sC;
+			d_create_strmat(m, k, &sA, (void *) A);
+			d_create_strmat(k, n, &sB, (void *) B);
+			d_create_strmat(m, n, &sC, (void *) C);
+			dgemm_nn_libstr(m, n, k, alpha, &sA, 0, 0, &sB, 0, 0, beta, &sC, 0, 0, &sC, 0, 0);
+			}
+		else
+			{
+			struct d_strmat sA;
+			struct d_strmat sB;
+			struct d_strmat sC;
+			d_create_strmat(m, k, &sA, (void *) A);
+			d_create_strmat(n, k, &sB, (void *) B);
+			d_create_strmat(m, n, &sC, (void *) C);
+			dgemm_nt_libstr(m, n, k, alpha, &sA, 0, 0, &sB, 0, 0, beta, &sC, 0, 0, &sC, 0, 0);
+			}
+		}
+	else
+		{
+		printf("\ndgemm: not implemente yet: transa==t\n");
+		}
+#else
     cblas_dgemm(CblasColMajor,
                 (CBLAS_TRANSPOSE)transa, (CBLAS_TRANSPOSE)transb,
                 m, n, k,
                 (alpha), A, lda,
                                     B, ldb,
                 (beta),  C, ldc);
+#endif
 }
 
 /******************************************************************************/

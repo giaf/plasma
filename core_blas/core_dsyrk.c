@@ -14,6 +14,12 @@
 #include "plasma_types.h"
 #include "core_lapack.h"
 
+#if defined(BLASFEO)
+#include "blasfeo_target.h"
+#include "blasfeo_common.h"
+#include "blasfeo_d_aux.h"
+#include "blasfeo_d_blas.h"
+#endif
 /***************************************************************************//**
  *
  * @ingroup core_syrk
@@ -76,11 +82,19 @@ void core_dsyrk(plasma_enum_t uplo, plasma_enum_t trans,
                 double alpha, const double *A, int lda,
                 double beta,        double *C, int ldc)
 {
+#if defined(BLASFEO)
+	struct d_strmat sA;
+	struct d_strmat sC;
+	d_create_strmat(n, k, &sA, A);
+	d_create_strmat(n, n, &sC, C);
+	dsyrk_ln_libstr(n, k, alpha, &sA, 0, 0, &sA, 0, 0, beta, &sC, 0, 0, &sC, 0, 0);
+#else
     cblas_dsyrk(CblasColMajor,
                 (CBLAS_UPLO)uplo, (CBLAS_TRANSPOSE)trans,
                 n, k,
                 (alpha), A, lda,
                 (beta),  C, ldc);
+#endif
 }
 
 /******************************************************************************/

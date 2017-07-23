@@ -46,7 +46,7 @@ void plasma_pddesc2ge(plasma_desc_t A,
             f77 = &pA[(size_t)A.nb*lda*n + (size_t)A.mb*m];
             bdl = (double*)plasma_tile_addr(A, m, n);
 
-            core_omp_dlacpy(PlasmaGeneral, PlasmaNoTrans,
+            core_omp_dlacpy2(PlasmaGeneral, PlasmaNoTrans,
                             y2-y1, x2-x1,
                             &(bdl[x1*A.nb+y1]), ldt,
                             &(f77[x1*lda+y1]), lda,

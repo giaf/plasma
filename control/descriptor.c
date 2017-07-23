@@ -12,6 +12,10 @@
 #include "plasma_descriptor.h"
 #include "plasma_internal.h"
 
+#if defined(BLASFEO)
+int posix_memalign(void **memptr, size_t alignment, size_t size);
+#endif
+
 /******************************************************************************/
 int plasma_desc_general_create(plasma_enum_t precision, int mb, int nb,
                                int lm, int ln, int i, int j, int m, int n,
@@ -38,7 +42,11 @@ int plasma_desc_general_create(plasma_enum_t precision, int mb, int nb,
     // Allocate the matrix.
     size_t size = (size_t)A->gm*A->gn*
                   plasma_element_size(A->precision);
+#if defined(BLASFEO)
+	int err = posix_memalign(&(A->matrix), 64, size);
+#else
     A->matrix = malloc(size);
+#endif
     if (A->matrix == NULL) {
         plasma_error("malloc() failed");
         return PlasmaErrorOutOfMemory;
@@ -110,7 +118,11 @@ int plasma_desc_triangular_create(plasma_enum_t precision, plasma_enum_t uplo, i
     int mnt = (ln1*(1+lm1))/2;
     size_t size = (size_t)(mnt*mb*nb + (lm * (ln%nb)))*
                   plasma_element_size(A->precision);
+#if defined(BLASFEO)
+	int err = posix_memalign(&(A->matrix), 64, size);
+#else
     A->matrix = malloc(size);
+#endif
     if (A->matrix == NULL) {
         plasma_error("malloc() failed");
         return PlasmaErrorOutOfMemory;

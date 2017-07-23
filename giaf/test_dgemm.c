@@ -15,10 +15,12 @@ int main()
 
 	plasma_enum_t transa = PlasmaNoTrans;
 	plasma_enum_t transb = PlasmaNoTrans;
+	char cn = 'n';
+	char ct = 't';
 
-	int m = 1024;
-	int n = 1024;
-	int k = 1024;
+	int m = 12;
+	int n = 12;
+	int k = 12;
 
 	double alpha = 1.0;
 	double beta = 0.0;
@@ -55,19 +57,30 @@ int main()
 	int ldc = Cm;
 
 	double *A = (double*)malloc((size_t)lda*An*sizeof(double));
+	for(ii=0; ii<m*k; ii++) 
+		A[ii] = ii;
+
 	double *B = (double*)malloc((size_t)ldb*Bn*sizeof(double));
+	for(ii=0; ii<k*n; ii++)
+		B[ii] = 0.0;
+	int Bmin = k<n ? k : n;
+	for(ii=0; ii<Bmin; ii++)
+		B[ii*(ldb+1)] = 1.0;
+
 	double *C = (double*)malloc((size_t)ldc*Cn*sizeof(double));
 
-	omp_set_num_threads(4);
+	omp_set_num_threads(1);
+
+	openblas_set_num_threads(1);
 
 	plasma_init();
 
 	// plasma tuning parameters
 	plasma_set(PlasmaTuning, PlasmaDisabled);
-	plasma_set(PlasmaNb, 64);
+	plasma_set(PlasmaNb, 12);
 
 	int rep;
-	int nrep = 10;
+	int nrep = 1;
 	struct timeval tv0, tv1;
 
 	gettimeofday(&tv0, NULL); // start
@@ -75,9 +88,12 @@ int main()
 	for(rep=0; rep<nrep; rep++)
 		{
 		plasma_dgemm(transa, transb, m, n, k, alpha, A, lda, B, ldb, beta, C, ldc);
+//		dgemm_(&cn, &cn, &m, &n, &k, &alpha, A, &lda, B, &ldb, &beta, C, &ldc);
 		}
 
 	gettimeofday(&tv1, NULL); // stop
+
+//	d_print_mat(m, n, C, ldc);
 
 	double time = (tv1.tv_sec-tv0.tv_sec)/(nrep+0.0)+(tv1.tv_usec-tv0.tv_usec)/(nrep*1e6);
 	double Gflops = 2.0*m*n*k*1e-9/time;

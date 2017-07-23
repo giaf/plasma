@@ -14,6 +14,12 @@
 #include "plasma_types.h"
 #include "core_lapack.h"
 
+#if defined(BLASFEO)
+#include "blasfeo_target.h"
+#include "blasfeo_common.h"
+#include "blasfeo_d_aux.h"
+#include "blasfeo_d_blas.h"
+#endif
 /***************************************************************************//**
  *
  * @ingroup core_trsm
@@ -91,12 +97,22 @@ void core_dtrsm(plasma_enum_t side, plasma_enum_t uplo,
                 double alpha, const double *A, int lda,
                                                 double *B, int ldb)
 {
+#if defined(BLASFEO)
+	struct d_strmat sA;
+	struct d_strmat sB;
+	d_create_strmat(n, n, &sA, A);
+	sA.dA = A+16;
+	sA.use_dA = 1;
+	d_create_strmat(m, n, &sB, B);
+	dtrsm_rltn_libstr(m, n, alpha, &sA, 0, 0, &sB, 0, 0, &sB, 0, 0);
+#else
     cblas_dtrsm(CblasColMajor,
                 (CBLAS_SIDE)side, (CBLAS_UPLO)uplo,
                 (CBLAS_TRANSPOSE)transa, (CBLAS_DIAG)diag,
                 m, n,
                 (alpha), A, lda,
                                     B, ldb);
+#endif
 }
 
 /******************************************************************************/

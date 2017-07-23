@@ -14,6 +14,12 @@
 #include "plasma_types.h"
 #include "core_lapack.h"
 
+#if defined(BLASFEO)
+#include "blasfeo_target.h"
+#include "blasfeo_common.h"
+#include "blasfeo_d_aux.h"
+#include "blasfeo_d_blas.h"
+#endif
 /***************************************************************************//**
  *
  * @ingroup core_potrf
@@ -56,10 +62,21 @@ int core_dpotrf(plasma_enum_t uplo,
                  int n,
                  double *A, int lda)
 {
+#if defined(BLASFEO)
+	struct d_strmat sA;
+	d_create_strmat(n, n, &sA, A);
+//	double *tmp = malloc(n*sizeof(double));
+//	sA.dA = tmp;
+	sA.dA = A+16; // XXX works only if n>=8 !!!
+	dpotrf_l_libstr(n, &sA, 0, 0, &sA, 0, 0);
+//	free(tmp);
+	return 0;
+#else
     return LAPACKE_dpotrf_work(LAPACK_COL_MAJOR,
                                lapack_const(uplo),
                                n,
                                A, lda);
+#endif
 }
 
 /******************************************************************************/
