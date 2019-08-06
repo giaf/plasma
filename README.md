@@ -1,3 +1,16 @@
+git repository to experiment about a BLASFEO-based PLASMA version
+
+BLASFEO
+=======
+
+BLASFEO - BLAS For Embedded Optimization
+
+BLASFEO provides a set of basic linear algebra routines, performance-optimized for matrices fitting in cache (i.e. generally up to a couple hundreds size in each dimension), as typically encountered in embedded optimization applications.
+
+https://github.com/giaf/blasfeo.git
+
+* * *
+* * *
 .
 
      _ \ |      \    __|  \  |   \
