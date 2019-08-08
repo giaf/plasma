@@ -36,8 +36,12 @@ void plasma_pddesc2ge_blasfeo(plasma_desc_t A,
     int n, m, ldt;
 
     for (m = 0; m < A.mt; m++) {
-        ldt = plasma_tile_mmain(A, m);
         for (n = 0; n < A.nt; n++) {
+#ifdef HAVE_BLASFEO_API
+			ldt = plasma_tile_nmain(A, n);
+#else
+			ldt = plasma_tile_mmain(A, m);
+#endif
             x1 = n == 0 ? A.j%A.nb : 0;
             y1 = m == 0 ? A.i%A.mb : 0;
             x2 = n == A.nt-1 ? (A.j+A.n-1)%A.nb+1 : A.nb;

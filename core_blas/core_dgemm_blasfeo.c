@@ -99,7 +99,7 @@ void plasma_core_dgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
 #if HAVE_BLASFEO_API
 	// TODO assume double precision !!!
 	// TODO assume nn version !!!
-printf("\n%d %d %d %d %d %d\n", m, n, k, lda, ldb, ldc);
+//printf("\n%d %d %d %d %d %d\n", m, n, k, lda, ldb, ldc);
 //printf("\nhere\n");
 	struct blasfeo_dmat sA, sB, sC;
 	blasfeo_create_dmat(m, k, &sA, A);
@@ -114,7 +114,7 @@ printf("\n%d %d %d %d %d %d\n", m, n, k, lda, ldb, ldc);
 //	blasfeo_print_dmat(m, n, &sC, 0, 0);
 //printf("\nafter print\n");
 	blasfeo_dgemm_nn(m, n, k, alpha, &sA, 0, 0, &sB, 0, 0, beta, &sC, 0, 0, &sC, 0, 0);
-printf("\nafter dgemm\n");
+//printf("\nafter dgemm\n");
 //	blasfeo_print_dmat(m, n, &sC, 0, 0);
 #else
     cblas_dgemm(CblasColMajor,

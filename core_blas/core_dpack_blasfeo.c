@@ -100,8 +100,8 @@ void plasma_core_dpack_blasfeo(plasma_enum_t uplo, plasma_enum_t transa,
         case PlasmaGeneral:
 #ifdef HAVE_BLASFEO_API
 		// TODO assume double precision !!!
-		blasfeo_create_dmat(m, n, &sB, B);
-		blasfeo_pack_tran_dmat(m, n, A, lda, &sB, 0, 0);
+//		blasfeo_create_dmat(m, n, &sB, B);
+//		blasfeo_pack_tran_dmat(m, n, A, lda, &sB, 0, 0);
 #else
             for (int i = 0; i < m; i++)
                 for (int j = 0; j < n; j++)

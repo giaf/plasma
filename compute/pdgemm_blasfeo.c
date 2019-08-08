@@ -41,7 +41,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
         for (int m = 0; m < C.mt; m++) {
             int mvcm = plasma_tile_mview(C, m);
 #if HAVE_BLASFEO_API
-            int ldcm = plasma_tile_nmain(C, m);
+            int ldcm = plasma_tile_nmain(C, m); // TODO fix !!!
 #else
             int ldcm = plasma_tile_mmain(C, m);
 #endif
@@ -64,7 +64,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                 }
                 else if (transa == PlasmaNoTrans) {
 #if HAVE_BLASFEO_API
-                    int ldam = plasma_tile_nmain(A, m);
+                    int ldam = plasma_tile_nmain(A, m); // TODO fix !!!
 #else
                     int ldam = plasma_tile_mmain(A, m);
 #endif
@@ -75,7 +75,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                         for (int k = 0; k < A.nt; k++) {
                             int nvak = plasma_tile_nview(A, k);
 #if HAVE_BLASFEO_API
-                            int ldbk = plasma_tile_nmain(B, k);
+                            int ldbk = plasma_tile_nmain(B, k); // TODO fix !!!
 #else
                             int ldbk = plasma_tile_mmain(B, k);
 #endif

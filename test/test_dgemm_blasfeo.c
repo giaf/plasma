@@ -38,13 +38,16 @@
 void test_dgemm_blasfeo(param_value_t param[], bool run)
 {
 //omp_set_num_threads(2);
+omp_set_num_threads(4);
+//printf("\nnum threads %d\n", omp_get_num_threads());
+printf("\nnum threads %d\n", omp_get_max_threads());
 
 	// our stuff
 	int m0 = 11; // 11;
 	int n0 = 11; // 11;
 	int k0 = 11; // 11;
 
-	int nb0 = 8;
+	int nb0 = 128;
 
 
 
@@ -70,12 +73,15 @@ void test_dgemm_blasfeo(param_value_t param[], bool run)
     plasma_enum_t transa = plasma_trans_const(param[PARAM_TRANSA].c);
     plasma_enum_t transb = plasma_trans_const(param[PARAM_TRANSB].c);
 
-//    int m = param[PARAM_DIM].dim.m;
-//    int n = param[PARAM_DIM].dim.n;
-//    int k = param[PARAM_DIM].dim.k;
+#if 1
+    int m = param[PARAM_DIM].dim.m;
+    int n = param[PARAM_DIM].dim.n;
+    int k = param[PARAM_DIM].dim.k;
+#else
 	int m = m0;
 	int n = n0;
 	int k = k0;
+#endif
 
     int Am, An;
     int Bm, Bn;
@@ -163,6 +169,7 @@ void test_dgemm_blasfeo(param_value_t param[], bool run)
     plasma_time_t start = omp_get_wtime();
 
     plasma_dgemm_blasfeo(
+//    plasma_dgemm(
         transa, transb,
         m, n, k,
         alpha, A, lda,
@@ -202,8 +209,8 @@ void test_dgemm_blasfeo(param_value_t param[], bool run)
                                 B, ldb,
              (beta), Cref, ldc);
 
-d_print_mat(m, n, C, ldc);
-d_print_mat(m, n, Cref, ldc);
+//d_print_mat(m, n, C, ldc);
+//d_print_mat(m, n, Cref, ldc);
 
         double zmone = -1.0;
         cblas_daxpy((size_t)ldc*Cn, (zmone), Cref, 1, C, 1);

@@ -230,16 +230,8 @@ int plasma_dgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
         plasma_omp_dge2desc_blasfeo(pB, ldb, B, &sequence, &request);
         plasma_omp_dge2desc_blasfeo(pC, ldc, C, &sequence, &request);
 
-d_print_mat(am, an, pA, lda);
-//d_print_mat(A.mb, A.nb, A.matrix, A.mb);
-//d_print_mat(A.mb, A.nb, A.matrix+A.mb*A.nb*sizeof(double), A.mb);
-//struct blasfeo_dmat sA;
-//blasfeo_create_dmat(A.mb, A.nb, &sA, A.matrix);
-//blasfeo_print_dmat(A.mb, A.nb, &sA, 0, 0);
-//blasfeo_create_dmat(A.mb, A.nb, &sA, A.matrix+A.mb*A.nb*sizeof(double));
-//blasfeo_print_dmat(A.mb, A.nb, &sA, 0, 0);
-
-plasma_dprint_blasfeo(A);
+//d_print_mat(am, an, pA, lda);
+//plasma_dprint_blasfeo(A);
 //exit(1);
 
         // Call the tile async function.
@@ -250,7 +242,7 @@ plasma_dprint_blasfeo(A);
                          &sequence, &request);
 
         // Translate back to LAPACK layout.
-        plasma_omp_ddesc2ge(C, pC, ldc, &sequence, &request);
+        plasma_omp_ddesc2ge_blasfeo(C, pC, ldc, &sequence, &request);
     }
     // implicit synchronization
 

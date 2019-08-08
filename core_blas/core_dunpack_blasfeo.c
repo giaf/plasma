@@ -67,12 +67,13 @@ void plasma_core_dunpack_blasfeo(plasma_enum_t uplo, plasma_enum_t transa,
                  const double *A, int lda,
                        double *B, int ldb)
 {
-	struct blasfeo_dmat sB;
+	struct blasfeo_dmat sA;
     if (transa == PlasmaNoTrans) {
 #ifdef HAVE_BLASFEO_API
 		// TODO assume double precision !!!
-		blasfeo_create_dmat(m, n, &sB, B);
-		blasfeo_pack_dmat(m, n, A, lda, &sB, 0, 0);
+		blasfeo_create_dmat(m, n, &sA, A);
+		sA.cn = lda;
+		blasfeo_unpack_dmat(m, n, &sA, 0, 0, B, ldb);
 #else
         LAPACKE_dlacpy_work(LAPACK_COL_MAJOR,
                             lapack_const(uplo),
@@ -96,8 +97,8 @@ void plasma_core_dunpack_blasfeo(plasma_enum_t uplo, plasma_enum_t transa,
         case PlasmaGeneral:
 #ifdef HAVE_BLASFEO_API
 		// TODO assume double precision !!!
-		blasfeo_create_dmat(m, n, &sB, B);
-		blasfeo_pack_tran_dmat(m, n, A, lda, &sB, 0, 0);
+//		blasfeo_create_dmat(m, n, &sB, B);
+//		blasfeo_pack_tran_dmat(m, n, A, lda, &sB, 0, 0);
 #else
             for (int i = 0; i < m; i++)
                 for (int j = 0; j < n; j++)
