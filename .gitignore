@@ -3,6 +3,7 @@
 *.o
 lib/*
 fortran_examples/*
+test/test
 
 # PLASMA's orignal .hgignore after here
 Makefile.coreblas.gen

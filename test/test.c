@@ -78,6 +78,11 @@ struct routines_t routines[] =
     { "cgemm", test_cgemm },
     { "sgemm", test_sgemm },
 
+    { "", NULL },
+    { "dgemm_blasfeo", test_dgemm_blasfeo },
+    { "", NULL },
+    { "", NULL },
+
     { "zgeqrf", test_zgeqrf },
     { "dgeqrf", test_dgeqrf },
     { "cgeqrf", test_cgeqrf },

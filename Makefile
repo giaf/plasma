@@ -105,6 +105,9 @@ plasma_obj   := $(addsuffix .o, $(basename $(filter-out %.h, $(plasma_all))))
 coreblas_obj := $(addsuffix .o, $(basename $(filter-out %.h, $(coreblas_all))))
 test_obj     := $(addsuffix .o, $(basename $(filter-out %.h, $(test_all))))
 
+# giaf's stuff
+test_obj += test/test_dgemm_blasfeo.o
+
 test_exe     := test/test
 
 ifeq ($(fortran), 1)
