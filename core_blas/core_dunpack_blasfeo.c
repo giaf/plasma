@@ -142,7 +142,7 @@ void plasma_core_omp_dunpack_blasfeo(plasma_enum_t uplo, plasma_enum_t transa,
                      depend(out:B[0:ldb*n])
     {
         if (sequence->status == PlasmaSuccess)
-            plasma_core_dlacpy(uplo, transa,
+            plasma_core_dunpack_blasfeo(uplo, transa,
                         m, n,
                         A, lda,
                         B, ldb);

@@ -36,21 +36,22 @@ void plasma_pdge2desc_blasfeo(double *pA, int lda,
     int n, m, ldt;
 
     for (m = 0; m < A.mt; m++) {
-#ifdef HAVE_BLASFEO_API
-        ldt = plasma_tile_nmain(A, m);
-#else
-        ldt = plasma_tile_mmain(A, m);
-#endif
         for (n = 0; n < A.nt; n++) {
+#ifdef HAVE_BLASFEO_API
+			ldt = plasma_tile_nmain(A, n);
+#else
+			ldt = plasma_tile_mmain(A, m);
+#endif
             x1 = n == 0 ? A.j%A.nb : 0;
             y1 = m == 0 ? A.i%A.mb : 0;
             x2 = n == A.nt-1 ? (A.j+A.n-1)%A.nb+1 : A.nb;
             y2 = m == A.mt-1 ? (A.i+A.m-1)%A.mb+1 : A.mb;
+//			printf("\nx1 y1 x2 y2 %d %d %d %d\n", x1, y1, x2, y2);
 
             f77 = &pA[(size_t)A.nb*lda*n + (size_t)A.mb*m];
             bdl = (double*)plasma_tile_addr(A, m, n);
 
-            plasma_core_omp_dlacpy(PlasmaGeneral, PlasmaNoTrans,
+            plasma_core_omp_dpack_blasfeo(PlasmaGeneral, PlasmaNoTrans,
                             y2-y1, x2-x1,
                             &(f77[x1*lda+y1]), lda,
                             &(bdl[x1*A.nb+y1]), ldt,

@@ -112,6 +112,7 @@ plasma_obj += compute/dge2desc_blasfeo.o
 plasma_obj += compute/pdge2desc_blasfeo.o
 plasma_obj += compute/ddesc2ge_blasfeo.o
 plasma_obj += compute/pddesc2ge_blasfeo.o
+#plasma_obj += compute/dprint_blasfeo.o
 coreblas_obj += core_blas/core_dgemm_blasfeo.o
 coreblas_obj += core_blas/core_dpack_blasfeo.o
 coreblas_obj += core_blas/core_dunpack_blasfeo.o

@@ -206,6 +206,18 @@ int plasma_desc_general_init(plasma_enum_t precision, void *matrix,
     A->type = PlasmaGeneral;
     A->precision = precision;
 
+    // main matrix parameters
+#ifdef HAVE_BLASFEO_API
+	// TODO assumes double precision !!!
+    A->gm = (lm+D_PS-1)/D_PS*D_PS;
+    A->gn = (ln+D_PS-1)/D_PS*D_PS;
+	lm = A->gm;
+	ln = A->gn;
+#else
+    A->gm = lm;
+    A->gn = ln;
+#endif
+
     // pointer and offsets
     A->matrix = matrix;
     A->A21 = (size_t)(lm - lm%mb) * (ln - ln%nb);
@@ -215,16 +227,6 @@ int plasma_desc_general_init(plasma_enum_t precision, void *matrix,
     // tile parameters
     A->mb = mb;
     A->nb = nb;
-
-    // main matrix parameters
-#ifdef HAVE_BLASFEO_API
-	// TODO assumes double precision !!!
-    A->gm = (lm+D_PS-1)/D_PS*D_PS;
-    A->gn = (ln+D_PS-1)/D_PS*D_PS;
-#else
-    A->gm = lm;
-    A->gn = ln;
-#endif
 
     A->gmt = (lm%mb == 0) ? (lm/mb) : (lm/mb+1);
     A->gnt = (ln%nb == 0) ? (ln/nb) : (ln/nb+1);

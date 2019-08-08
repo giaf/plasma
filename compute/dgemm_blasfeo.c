@@ -233,11 +233,13 @@ int plasma_dgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
 d_print_mat(am, an, pA, lda);
 //d_print_mat(A.mb, A.nb, A.matrix, A.mb);
 //d_print_mat(A.mb, A.nb, A.matrix+A.mb*A.nb*sizeof(double), A.mb);
-struct blasfeo_dmat sA;
-blasfeo_create_dmat(A.mb, A.nb, &sA, A.matrix);
-blasfeo_print_dmat(A.mb, A.nb, &sA, 0, 0);
-blasfeo_create_dmat(A.mb, A.nb, &sA, A.matrix+A.mb*A.nb*sizeof(double));
-blasfeo_print_dmat(A.mb, A.nb, &sA, 0, 0);
+//struct blasfeo_dmat sA;
+//blasfeo_create_dmat(A.mb, A.nb, &sA, A.matrix);
+//blasfeo_print_dmat(A.mb, A.nb, &sA, 0, 0);
+//blasfeo_create_dmat(A.mb, A.nb, &sA, A.matrix+A.mb*A.nb*sizeof(double));
+//blasfeo_print_dmat(A.mb, A.nb, &sA, 0, 0);
+
+plasma_dprint_blasfeo(A);
 //exit(1);
 
         // Call the tile async function.

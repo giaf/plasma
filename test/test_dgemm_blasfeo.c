@@ -37,11 +37,12 @@
  ******************************************************************************/
 void test_dgemm_blasfeo(param_value_t param[], bool run)
 {
+//omp_set_num_threads(2);
 
 	// our stuff
-	int m0 = 15; // 11;
-	int n0 = 15; // 11;
-	int k0 = 15; // 11;
+	int m0 = 11; // 11;
+	int n0 = 11; // 11;
+	int k0 = 11; // 11;
 
 	int nb0 = 8;
 

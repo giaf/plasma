@@ -71,8 +71,12 @@ void plasma_core_dpack_blasfeo(plasma_enum_t uplo, plasma_enum_t transa,
     if (transa == PlasmaNoTrans) {
 #ifdef HAVE_BLASFEO_API
 		// TODO assume double precision !!!
+//		printf("\npack %d %d\n", m, n);
+//		d_print_mat(m, n, A, lda);
 		blasfeo_create_dmat(m, n, &sB, B);
+		sB.cn = ldb;
 		blasfeo_pack_dmat(m, n, A, lda, &sB, 0, 0);
+//		blasfeo_print_dmat(m, n, &sB, 0, 0);
 #else
         LAPACKE_dlacpy_work(LAPACK_COL_MAJOR,
                             lapack_const(uplo),
@@ -142,7 +146,7 @@ void plasma_core_omp_dpack_blasfeo(plasma_enum_t uplo, plasma_enum_t transa,
                      depend(out:B[0:ldb*n])
     {
         if (sequence->status == PlasmaSuccess)
-            plasma_core_dlacpy(uplo, transa,
+            plasma_core_dpack_blasfeo(uplo, transa,
                         m, n,
                         A, lda,
                         B, ldb);
