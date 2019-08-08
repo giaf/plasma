@@ -44,6 +44,9 @@ typedef struct {
     plasma_enum_t precision; ///< precision of the matrix
 
     // pointer and offsets
+#ifdef HAVE_BLASFEO_API
+	void *mem_ptr; ///< store the pointer from malloc
+#endif
     void *matrix; ///< pointer to the beginning of the matrix
     size_t A21;   ///< pointer to the beginning of A21
     size_t A12;   ///< pointer to the beginning of A12

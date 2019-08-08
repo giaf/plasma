@@ -11,7 +11,10 @@
 #include "plasma_context.h"
 #include "plasma_descriptor.h"
 #include "plasma_internal.h"
-#include "blasfeo_block_size"
+#ifdef HAVE_BLASFEO_API
+#include "blasfeo_target.h"
+#include "blasfeo_block_size.h"
+#endif
 
 /******************************************************************************/
 int plasma_desc_general_create(plasma_enum_t precision, int mb, int nb,
@@ -37,9 +40,20 @@ int plasma_desc_general_create(plasma_enum_t precision, int mb, int nb,
         return PlasmaErrorIllegalValue;
     }
     // Allocate the matrix.
+	// XXX allocates extra memory for cache size alignment
     size_t size = (size_t)A->gm*A->gn*
                   plasma_element_size(A->precision);
+#ifdef HAVE_BLASFEO_API
+	// allocate a bit more memory
+	A->mem_ptr = malloc(size+64);
+	// align to cache line boundaries (64 bytes)
+	size_t s_ptr = (size_t) A->mem_ptr;
+	s_ptr = (s_ptr+63)/64*64;
+    A->matrix = (void *) s_ptr;
+//	printf("\n%p %p\n", A->mem_ptr, A->matrix);
+#else
     A->matrix = malloc(size);
+#endif
     if (A->matrix == NULL) {
         plasma_error("malloc() failed");
         return PlasmaErrorOutOfMemory;
@@ -48,6 +62,7 @@ int plasma_desc_general_create(plasma_enum_t precision, int mb, int nb,
 }
 
 /******************************************************************************/
+#if 0
 int plasma_desc_general_create_blasfeo(plasma_enum_t precision, int mb, int nb,
                                int lm, int ln, int i, int j, int m, int n,
                                plasma_desc_t *A)
@@ -59,12 +74,12 @@ int plasma_desc_general_create_blasfeo(plasma_enum_t precision, int mb, int nb,
     }
 
     if (mb%D_PS!=0) {
-        plasma_error("mb should be multiple of "D_PS);
+        plasma_error("mb should be multiple of BLASFEO D_PS");
         return PlasmaErrorIllegalValue;
     }
 
     if (nb%D_NC!=0) {
-        plasma_error("nb should be multiple of "D_NC);
+        plasma_error("nb should be multiple of BLASFEO D_CN");
         return PlasmaErrorIllegalValue;
     }
 
@@ -92,6 +107,7 @@ int plasma_desc_general_create_blasfeo(plasma_enum_t precision, int mb, int nb,
     }
     return PlasmaSuccess;    
 }
+#endif
 
 /******************************************************************************/
 int plasma_desc_general_band_create(plasma_enum_t precision, plasma_enum_t uplo,
@@ -173,7 +189,11 @@ int plasma_desc_destroy(plasma_desc_t *A)
         plasma_error("PLASMA not initialized");
         return PlasmaErrorNotInitialized;
     }
+#ifdef HAVE_BLASFEO_API
+    free(A->mem_ptr);
+#else
     free(A->matrix);
+#endif
     return PlasmaSuccess;
 }
 
@@ -197,8 +217,14 @@ int plasma_desc_general_init(plasma_enum_t precision, void *matrix,
     A->nb = nb;
 
     // main matrix parameters
+#ifdef HAVE_BLASFEO_API
+	// TODO assumes double precision !!!
+    A->gm = (lm+D_PS-1)/D_PS*D_PS;
+    A->gn = (ln+D_PS-1)/D_PS*D_PS;
+#else
     A->gm = lm;
     A->gn = ln;
+#endif
 
     A->gmt = (lm%mb == 0) ? (lm/mb) : (lm/mb+1);
     A->gnt = (ln%nb == 0) ? (ln/nb) : (ln/nb+1);
