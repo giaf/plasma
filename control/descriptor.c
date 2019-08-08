@@ -11,6 +11,7 @@
 #include "plasma_context.h"
 #include "plasma_descriptor.h"
 #include "plasma_internal.h"
+#include "blasfeo_block_size"
 
 /******************************************************************************/
 int plasma_desc_general_create(plasma_enum_t precision, int mb, int nb,
@@ -44,6 +45,52 @@ int plasma_desc_general_create(plasma_enum_t precision, int mb, int nb,
         return PlasmaErrorOutOfMemory;
     }
     return PlasmaSuccess;
+}
+
+/******************************************************************************/
+int plasma_desc_general_create_blasfeo(plasma_enum_t precision, int mb, int nb,
+                               int lm, int ln, int i, int j, int m, int n,
+                               plasma_desc_t *A)
+{
+    plasma_context_t *plasma = plasma_context_self();
+    if (plasma == NULL) {
+        plasma_error("PLASMA not initialized");
+        return PlasmaErrorNotInitialized;
+    }
+
+    if (mb%D_PS!=0) {
+        plasma_error("mb should be multiple of "D_PS);
+        return PlasmaErrorIllegalValue;
+    }
+
+    if (nb%D_NC!=0) {
+        plasma_error("nb should be multiple of "D_NC);
+        return PlasmaErrorIllegalValue;
+    }
+
+    // Initialize the descriptor.
+    int retval = plasma_desc_general_init(precision, NULL, mb, nb,
+                                          lm, ln, i, j, m, n, A);
+    if (retval != PlasmaSuccess) {
+        plasma_error("plasma_desc_general_init() failed");
+        return retval;
+    }
+    // Check the descriptor.
+    retval = plasma_desc_check(*A);
+    if (retval != PlasmaSuccess) {
+        plasma_error("plasma_desc_check() failed");
+        return PlasmaErrorIllegalValue;
+    }
+
+    // Allocate the matrix.
+    size_t size = (size_t)A->gmt*mb*A->gnt*nb*
+                  plasma_element_size(A->precision);
+    A->matrix = malloc(size);
+    if (A->matrix == NULL) {
+        plasma_error("malloc() failed");
+        return PlasmaErrorOutOfMemory;
+    }
+    return PlasmaSuccess;    
 }
 
 /******************************************************************************/
