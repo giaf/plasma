@@ -161,7 +161,7 @@ void test_dgemm_blasfeo(param_value_t param[], bool run)
     //================================================================
     plasma_time_t start = omp_get_wtime();
 
-    plasma_dgemm(
+    plasma_dgemm_blasfeo(
         transa, transb,
         m, n, k,
         alpha, A, lda,

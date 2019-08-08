@@ -106,6 +106,15 @@ coreblas_obj := $(addsuffix .o, $(basename $(filter-out %.h, $(coreblas_all))))
 test_obj     := $(addsuffix .o, $(basename $(filter-out %.h, $(test_all))))
 
 # giaf's stuff
+plasma_obj += compute/dgemm_blasfeo.o
+plasma_obj += compute/pdgemm_blasfeo.o
+plasma_obj += compute/dge2desc_blasfeo.o
+plasma_obj += compute/pdge2desc_blasfeo.o
+plasma_obj += compute/ddesc2ge_blasfeo.o
+plasma_obj += compute/pddesc2ge_blasfeo.o
+coreblas_obj += core_blas/core_dgemm_blasfeo.o
+coreblas_obj += core_blas/core_dpack_blasfeo.o
+coreblas_obj += core_blas/core_dunpack_blasfeo.o
 test_obj += test/test_dgemm_blasfeo.o
 
 test_exe     := test/test
