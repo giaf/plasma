@@ -18,6 +18,19 @@
 #include "plasma_workspace.h"
 #include <plasma_core_blas.h>
 
+#include "blasfeo_d_aux.h"
+
+
+
+//void plasma_core_omp_dgemm_blasfeo(
+//    plasma_enum_t transa, plasma_enum_t transb,
+//    int m, int n, int k,
+//    double alpha, const double *A, int lda,
+//                              const double *B, int ldb,
+//    double beta,        double *C, int ldc,
+//    double beta,        struct blasfeo_dmat *sC, int ci, int cj,
+//    plasma_sequence_t *sequence, plasma_request_t *request);
+
 
 
 #define A(m, n) (double*)plasma_tile_addr(A, m, n)
@@ -40,12 +53,12 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
     if (A.type == PlasmaGeneral) {
         for (int m = 0; m < C.mt; m++) {
             int mvcm = plasma_tile_mview(C, m);
-#if HAVE_BLASFEO_API
-            int ldcm = plasma_tile_nmain(C, m); // TODO fix !!!
-#else
-            int ldcm = plasma_tile_mmain(C, m);
-#endif
             for (int n = 0; n < C.nt; n++) {
+#if HAVE_BLASFEO_API
+				int sdcn = plasma_tile_nmain(C, n);
+#else
+				int ldcm = plasma_tile_mmain(C, m);
+#endif
                 int nvcn = plasma_tile_nview(C, n);
                 //=========================================
                 // alpha*A*B does not contribute; scale C
@@ -54,6 +67,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                 if (alpha == 0.0 || inner_k == 0) {
                     int ldam = imax(1, plasma_tile_mmain(A, 0));
                     int ldbk = imax(1, plasma_tile_mmain(B, 0));
+#if 0
                     plasma_core_omp_dgemm_blasfeo(
                         transa, transb,
                         mvcm, nvcn, 0,
@@ -61,12 +75,12 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                         B(0, 0), ldbk,
                         beta,  C(m, n), ldcm,
                         sequence, request);
+#endif
                 }
                 else if (transa == PlasmaNoTrans) {
 #if HAVE_BLASFEO_API
-                    int ldam = plasma_tile_nmain(A, m); // TODO fix !!!
 #else
-                    int ldam = plasma_tile_mmain(A, m);
+					int ldam = plasma_tile_mmain(A, m);
 #endif
                     //================================
                     // PlasmaNoTrans / PlasmaNoTrans
@@ -75,17 +89,30 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                         for (int k = 0; k < A.nt; k++) {
                             int nvak = plasma_tile_nview(A, k);
 #if HAVE_BLASFEO_API
-                            int ldbk = plasma_tile_nmain(B, k); // TODO fix !!!
+							int sdak = plasma_tile_nmain(A, k);
+                            int sdbn = plasma_tile_nmain(B, n);
 #else
                             int ldbk = plasma_tile_mmain(B, k);
 #endif
                             double zbeta = k == 0 ? beta : 1.0;
+							// create blasfeo matrices
+							struct blasfeo_dmat sA, sB, sC;
+							blasfeo_create_dmat(m, k, &sA, A(m, k));
+							sA.cn = sdak;
+							blasfeo_create_dmat(k, n, &sB, B(k, n));
+							sB.cn = sdbn;
+							blasfeo_create_dmat(m, n, &sC, C(m, n));
+							sC.cn = sdcn;
+							// call LA routine
                             plasma_core_omp_dgemm_blasfeo(
                                 transa, transb,
                                 mvcm, nvcn, nvak,
-                                alpha, A(m, k), ldam,
-                                B(k, n), ldbk,
-                                zbeta, C(m, n), ldcm,
+//                                alpha, A(m, k), ldam,
+                                alpha, &sA, 0, 0,
+//                                B(k, n), ldbk,
+                                &sB, 0, 0,
+//                                zbeta, C(m, n), ldcm,
+                                zbeta, &sC, 0, 0,
                                 sequence, request);
                         }
                     }
@@ -97,6 +124,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                         for (int k = 0; k < A.nt; k++) {
                             int nvak = plasma_tile_nview(A, k);
                             double zbeta = k == 0 ? beta : 1.0;
+#if 0
                             plasma_core_omp_dgemm_blasfeo(
                                 transa, transb,
                                 mvcm, nvcn, nvak,
@@ -104,6 +132,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                                 B(n, k), ldbn,
                                 zbeta, C(m, n), ldcm,
                                 sequence, request);
+#endif
                         }
                     }
                 }
@@ -117,6 +146,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                             int ldak = plasma_tile_mmain(A, k);
                             int ldbk = plasma_tile_mmain(B, k);
                             double zbeta = k == 0 ? beta : 1.0;
+#if 0
                             plasma_core_omp_dgemm_blasfeo(
                                 transa, transb,
                                 mvcm, nvcn, mvak,
@@ -124,6 +154,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                                 B(k, n), ldbk,
                                 zbeta, C(m, n), ldcm,
                                 sequence, request);
+#endif
                         }
                     }
                     //==========================================
@@ -135,6 +166,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                             int mvak = plasma_tile_mview(A, k);
                             int ldak = plasma_tile_mmain(A, k);
                             double zbeta = k == 0 ? beta : 1.0;
+#if 0
                             plasma_core_omp_dgemm_blasfeo(
                                 transa, transb,
                                 mvcm, nvcn, mvak,
@@ -142,6 +174,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                                 B(n, k), ldbn,
                                 zbeta, C(m, n), ldcm,
                                 sequence, request);
+#endif
                         }
                     }
                 }
@@ -161,6 +194,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                 if (alpha == 0.0 || inner_k == 0) {
                     int ldam = imax(1, plasma_tile_mmain(A, 0));
                     int ldbk = imax(1, plasma_tile_mmain(B, 0));
+#if 0
                     plasma_core_omp_dgemm_blasfeo(
                         transa, transb,
                         mvcm, nvcn, 0,
@@ -168,6 +202,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                         B(0, 0), ldbk,
                         beta,  C(m, n), ldcm,
                         sequence, request);
+#endif
                 }
                 else if (transa == PlasmaNoTrans) {
                     //================================
@@ -184,6 +219,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                             int ldbk = plasma_tile_mmain(B, k);
                             double zbeta = k == 0 ? beta : 1.0;
 
+#if 0
                             plasma_core_omp_dgemm_blasfeo(
                                 transa, transb,
                                 mvcm, nvcn, nvak,
@@ -191,6 +227,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                                 B(k, n), ldbk,
                                 zbeta, C(m, n), ldcm,
                                 sequence, request);
+#endif
                         }
                     }
                     //=====================================

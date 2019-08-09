@@ -47,7 +47,7 @@ printf("\nnum threads %d\n", omp_get_max_threads());
 	int n0 = 11; // 11;
 	int k0 = 11; // 11;
 
-	int nb0 = 128;
+	int nb0 = 8;
 
 
 
@@ -73,7 +73,7 @@ printf("\nnum threads %d\n", omp_get_max_threads());
     plasma_enum_t transa = plasma_trans_const(param[PARAM_TRANSA].c);
     plasma_enum_t transb = plasma_trans_const(param[PARAM_TRANSB].c);
 
-#if 1
+#if 0
     int m = param[PARAM_DIM].dim.m;
     int n = param[PARAM_DIM].dim.n;
     int k = param[PARAM_DIM].dim.k;
@@ -209,8 +209,8 @@ printf("\nnum threads %d\n", omp_get_max_threads());
                                 B, ldb,
              (beta), Cref, ldc);
 
-//d_print_mat(m, n, C, ldc);
-//d_print_mat(m, n, Cref, ldc);
+d_print_mat(m, n, C, ldc);
+d_print_mat(m, n, Cref, ldc);
 
         double zmone = -1.0;
         cblas_daxpy((size_t)ldc*Cn, (zmone), Cref, 1, C, 1);
