@@ -86,14 +86,11 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                     // PlasmaNoTrans / PlasmaNoTrans
                     //================================
                     if (transb == PlasmaNoTrans) {
+                        printf("a:n b:n\n");
                         for (int k = 0; k < A.nt; k++) {
                             int nvak = plasma_tile_nview(A, k);
-#if HAVE_BLASFEO_API
 							int sdak = plasma_tile_nmain(A, k);
                             int sdbn = plasma_tile_nmain(B, n);
-#else
-                            int ldbk = plasma_tile_mmain(B, k);
-#endif
                             double zbeta = k == 0 ? beta : 1.0;
 							// create blasfeo matrices
 							struct blasfeo_dmat sA, sB, sC;
@@ -107,11 +104,8 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                             plasma_core_omp_dgemm_blasfeo(
                                 transa, transb,
                                 mvcm, nvcn, nvak,
-//                                alpha, A(m, k), ldam,
                                 alpha, &sA, 0, 0,
-//                                B(k, n), ldbk,
                                 &sB, 0, 0,
-//                                zbeta, C(m, n), ldcm,
                                 zbeta, &sC, 0, 0,
                                 sequence, request);
                         }
@@ -120,61 +114,82 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                     // PlasmaNoTrans / Plasma[_Conj]Trans
                     //=====================================
                     else {
-                        int ldbn = plasma_tile_mmain(B, n);
+                        printf("a:n b:t\n");
                         for (int k = 0; k < A.nt; k++) {
                             int nvak = plasma_tile_nview(A, k);
+							int sdak = plasma_tile_nmain(A, k);
+                            int sdbn = plasma_tile_mmain(B, k); 
                             double zbeta = k == 0 ? beta : 1.0;
-#if 0
+                            struct blasfeo_dmat sA, sB, sC;
+							blasfeo_create_dmat(m, k, &sA, A(m, k));
+							sA.cn = sdak;
+							blasfeo_create_dmat(n, k, &sB, B(n, k));
+							sB.cn = sdbn;
+							blasfeo_create_dmat(m, n, &sC, C(m, n));
+							sC.cn = sdcn;
                             plasma_core_omp_dgemm_blasfeo(
                                 transa, transb,
                                 mvcm, nvcn, nvak,
-                                alpha, A(m, k), ldam,
-                                B(n, k), ldbn,
-                                zbeta, C(m, n), ldcm,
+                                alpha, &sA, 0, 0,
+                                &sB, 0, 0,
+                                zbeta, &sC, 0, 0,
                                 sequence, request);
-#endif
                         }
                     }
                 }
+                //=====================================
+                // Plasma[_Conj]Trans / PlasmaNoTrans
+                //=====================================
                 else {
-                    //=====================================
-                    // Plasma[_Conj]Trans / PlasmaNoTrans
-                    //=====================================
+                    printf("a:t b:n\n");
                     if (transb == PlasmaNoTrans) {
                         for (int k = 0; k < A.mt; k++) {
+
+							int sdak = plasma_tile_mmain(A, m);
+                            int sdbn = plasma_tile_nmain(B, n);
                             int mvak = plasma_tile_mview(A, k);
-                            int ldak = plasma_tile_mmain(A, k);
-                            int ldbk = plasma_tile_mmain(B, k);
                             double zbeta = k == 0 ? beta : 1.0;
-#if 0
+                            struct blasfeo_dmat sA, sB, sC;
+							blasfeo_create_dmat(k, m, &sA, A(k, m));
+							sA.cn = sdak;
+							blasfeo_create_dmat(k, n, &sB, B(k, n));
+							sB.cn = sdbn;
+							blasfeo_create_dmat(m, n, &sC, C(m, n));
+							sC.cn = sdcn;
                             plasma_core_omp_dgemm_blasfeo(
                                 transa, transb,
                                 mvcm, nvcn, mvak,
-                                alpha, A(k, m), ldak,
-                                B(k, n), ldbk,
-                                zbeta, C(m, n), ldcm,
+                                alpha, &sA, 0, 0,
+                                &sB, 0, 0,
+                                zbeta, &sC, 0, 0,
                                 sequence, request);
-#endif
                         }
                     }
                     //==========================================
                     // Plasma[_Conj]Trans / Plasma[_Conj]Trans
                     //==========================================
                     else {
-                        int ldbn = plasma_tile_mmain(B, n);
+                        printf("a:t b:t\n");
                         for (int k = 0; k < A.mt; k++) {
+
                             int mvak = plasma_tile_mview(A, k);
-                            int ldak = plasma_tile_mmain(A, k);
+							int sdak = plasma_tile_mmain(A, m);
+                            int sdbn = plasma_tile_mmain(B, k);
                             double zbeta = k == 0 ? beta : 1.0;
-#if 0
+                            struct blasfeo_dmat sA, sB, sC;
+							blasfeo_create_dmat(k, m, &sA, A(k, m));
+							sA.cn = sdak;
+							blasfeo_create_dmat(n, k, &sB, B(n, k));
+							sB.cn = sdbn;
+							blasfeo_create_dmat(m, n, &sC, C(m, n));
+							sC.cn = sdcn;
                             plasma_core_omp_dgemm_blasfeo(
                                 transa, transb,
                                 mvcm, nvcn, mvak,
-                                alpha, A(k, m), ldak,
-                                B(n, k), ldbn,
-                                zbeta, C(m, n), ldcm,
+                                alpha, &sA, 0, 0,
+                                &sB, 0, 0,
+                                zbeta, &sC, 0, 0,
                                 sequence, request);
-#endif
                         }
                     }
                 }
