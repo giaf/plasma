@@ -38,16 +38,16 @@
 void test_dgemm_blasfeo(param_value_t param[], bool run)
 {
 //omp_set_num_threads(2);
-omp_set_num_threads(4);
+// omp_set_num_threads(4);
 //printf("\nnum threads %d\n", omp_get_num_threads());
-printf("\nnum threads %d\n", omp_get_max_threads());
+// printf("\nnum threads %d\n", omp_get_max_threads());
 
 	// our stuff
-	int m0 = 11; // 11;
-	int n0 = 11; // 11;
-	int k0 = 11; // 11;
+	// int m0 = 20; // 11;
+	// int n0 = 20; // 11;
+	// int k0 = 20; // 11;
 
-	int nb0 = 8;
+	// int nb0 = 8;
 
 
 
@@ -73,7 +73,7 @@ printf("\nnum threads %d\n", omp_get_max_threads());
     plasma_enum_t transa = plasma_trans_const(param[PARAM_TRANSA].c);
     plasma_enum_t transb = plasma_trans_const(param[PARAM_TRANSB].c);
 
-#if 0
+#if 1
     int m = param[PARAM_DIM].dim.m;
     int n = param[PARAM_DIM].dim.n;
     int k = param[PARAM_DIM].dim.k;
@@ -125,8 +125,8 @@ printf("\nnum threads %d\n", omp_get_max_threads());
     // Set tuning parameters.
     //================================================================
     plasma_set(PlasmaTuning, PlasmaDisabled);
-//    plasma_set(PlasmaNb, param[PARAM_NB].i);
-    plasma_set(PlasmaNb, nb0);
+    plasma_set(PlasmaNb, param[PARAM_NB].i);
+    // plasma_set(PlasmaNb, nb0);
 
     //================================================================
     // Allocate and initialize arrays.
@@ -209,8 +209,8 @@ printf("\nnum threads %d\n", omp_get_max_threads());
                                 B, ldb,
              (beta), Cref, ldc);
 
-d_print_mat(m, n, C, ldc);
-d_print_mat(m, n, Cref, ldc);
+// d_print_mat(m, n, C, ldc);
+// d_print_mat(m, n, Cref, ldc);
 
         double zmone = -1.0;
         cblas_daxpy((size_t)ldc*Cn, (zmone), Cref, 1, C, 1);

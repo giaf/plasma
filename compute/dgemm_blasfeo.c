@@ -378,6 +378,8 @@ void plasma_omp_dgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
     if (C.m == 0 || C.n == 0 || ((alpha == 0.0 || k == 0) && beta == 1.0))
         return;
 
+    // printf("%d %d\n",transa,transb);
+
     // Call the parallel function.
     plasma_pdgemm_blasfeo(transa, transb,
                   alpha, A,
