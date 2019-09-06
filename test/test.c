@@ -83,6 +83,11 @@ struct routines_t routines[] =
     { "", NULL },
     { "", NULL },
 
+    { "", NULL },
+    { "dgemm_nopack", test_dgemm_nopack },
+    { "", NULL },
+    { "", NULL },
+
     { "zgeqrf", test_zgeqrf },
     { "dgeqrf", test_dgeqrf },
     { "cgeqrf", test_cgeqrf },
@@ -232,6 +237,11 @@ struct routines_t routines[] =
     { "dpotrf", test_dpotrf },
     { "cpotrf", test_cpotrf },
     { "spotrf", test_spotrf },
+
+    { "", NULL },
+    { "dpotrf_nopack", test_dpotrf_nopack },
+    { "", NULL },
+    { "", NULL },
 
     { "zpotri", test_zpotri },
     { "dpotri", test_dpotri },
