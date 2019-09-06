@@ -175,5 +175,6 @@ static inline int imax(int a, int b)
 #include "test_z.h"
 #include "test_zc.h"
 #include "test_d_blasfeo.h"
+#include "test_d_nopack.h"
 
 #endif // TEST_H

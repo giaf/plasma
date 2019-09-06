@@ -55,7 +55,6 @@ void test_dgemm_blasfeo(param_value_t param[], bool run)
 
 
 
-
     //================================================================
     // Mark which parameters are used.
     //================================================================
