@@ -18,6 +18,6 @@
 // test routines
 //==============================================================================
 void test_dgemm_blasfeo(param_value_t param[], bool run);
-
+void test_dpotrf_blasfeo(param_value_t param[], bool run);
 #endif // TEST_D_BLASFEO_H
 

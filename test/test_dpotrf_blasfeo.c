@@ -38,7 +38,7 @@
  * Sets flags in param indicating which parameters are used.
  * If run is true, also runs test and stores output parameters.
  ******************************************************************************/
-void test_dpotrf(param_value_t param[], bool run)
+void test_dpotrf_blasfeo(param_value_t param[], bool run)
 {
     //================================================================
     // Mark which parameters are used.
