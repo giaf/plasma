@@ -86,7 +86,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                     // PlasmaNoTrans / PlasmaNoTrans
                     //================================
                     if (transb == PlasmaNoTrans) {
-                        printf("a:n b:n\n");
+//                        printf("a:n b:n\n");
                         for (int k = 0; k < A.nt; k++) {
                             int nvak = plasma_tile_nview(A, k);
 							int sdak = plasma_tile_nmain(A, k);
@@ -114,7 +114,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                     // PlasmaNoTrans / Plasma[_Conj]Trans
                     //=====================================
                     else {
-                        printf("a:n b:t\n");
+//                        printf("a:n b:t\n");
                         for (int k = 0; k < A.nt; k++) {
                             int nvak = plasma_tile_nview(A, k);
 							int sdak = plasma_tile_nmain(A, k);
@@ -141,7 +141,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                 // Plasma[_Conj]Trans / PlasmaNoTrans
                 //=====================================
                 else {
-                    printf("a:t b:n\n");
+//                    printf("a:t b:n\n");
                     if (transb == PlasmaNoTrans) {
                         for (int k = 0; k < A.mt; k++) {
 
@@ -169,7 +169,7 @@ void plasma_pdgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
                     // Plasma[_Conj]Trans / Plasma[_Conj]Trans
                     //==========================================
                     else {
-                        printf("a:t b:t\n");
+//                        printf("a:t b:t\n");
                         for (int k = 0; k < A.mt; k++) {
 
                             int mvak = plasma_tile_mview(A, k);
