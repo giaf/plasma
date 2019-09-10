@@ -54,27 +54,32 @@
 __attribute__((weak))
 int plasma_core_dpotrf_blasfeo(plasma_enum_t uplo,
                  int n,
-                 double *A, int lda)
+                 struct blasfeo_dmat *sA, int lda)
 {
-    return LAPACKE_dpotrf_work(LAPACK_COL_MAJOR,
-                               lapack_const(uplo),
-                               n,
-                               A, lda);
+    // return LAPACKE_dpotrf_work(LAPACK_COL_MAJOR,
+    //                            lapack_const(uplo),
+    //                            n,
+    //                            A, lda);
+    blasfeo_dpotrf_l(n, sA, 0, 0, sA, 0, 0);
+    return 0;
 }
 
 /******************************************************************************/
 void plasma_core_omp_dpotrf_blasfeo(plasma_enum_t uplo,
                      int n,
-                     double *A, int lda,
+                     struct blasfeo_dmat *sA, int lda,
                      int iinfo,
                      plasma_sequence_t *sequence, plasma_request_t *request)
 {
+    // make a local copy of the structure, such that the orignal one can be safely destroyed when out of scope
+	struct blasfeo_dmat sA2;
+    sA2 = *sA;
     #pragma omp task depend(inout:A[0:lda*n])
     {
         if (sequence->status == PlasmaSuccess) {
             int info = plasma_core_dpotrf_blasfeo(uplo,
                                    n,
-                                   A, lda);
+                                   &sA2, lda);
             if (info != 0)
                 plasma_request_fail(sequence, request, iinfo+info);
         }
