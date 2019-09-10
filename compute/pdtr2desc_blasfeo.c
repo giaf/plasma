@@ -41,7 +41,7 @@ void plasma_pdtr2desc_blasfeo(double *pA, int lda,
             double *f77 = &pA[(size_t)A.nb*lda*n + (size_t)A.mb*m];
             double *bdl = (double*)plasma_tile_addr(A, m, n);
 
-            plasma_core_omp_dlacpy(PlasmaGeneral, PlasmaNoTrans,
+            plasma_core_omp_dpack_blasfeo(PlasmaGeneral, PlasmaNoTrans,
                             y2-y1, x2-x1,
                             &(f77[x1*lda+y1]), lda,
                             &(bdl[x1*A.nb+y1]), ldt,

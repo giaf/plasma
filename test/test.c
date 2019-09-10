@@ -239,6 +239,11 @@ struct routines_t routines[] =
     { "spotrf", test_spotrf },
 
     { "", NULL },
+    { "dpotrf_blasfeo", test_dpotrf_blasfeo },
+    { "", NULL },
+    { "", NULL },
+
+    { "", NULL },
     { "dpotrf_nopack", test_dpotrf_nopack },
     { "", NULL },
     { "", NULL },
