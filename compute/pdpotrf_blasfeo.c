@@ -77,6 +77,7 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
                     sequence, request);
 #endif
             }
+
             for (int m = k+1; m < A.mt; m++) {
                 int mvam = plasma_tile_mview(A, m);
                 int ldam = plasma_tile_mmain(A, m);
