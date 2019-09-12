@@ -180,7 +180,6 @@ int plasma_desc_triangular_create(plasma_enum_t precision, plasma_enum_t uplo, i
     size_t size = (size_t) (mnt*mb*nb + (tmp_lm * (tmp_ln%nb)))*plasma_element_size(A->precision);
 #ifdef HAVE_BLASFEO_API
 	// add size for vector
-	printf("\nsize vector %d %d %d\n", A->gmt, A->gnt, A->nb);
 	size += A->gmt*A->gnt*A->nb*plasma_element_size(A->precision);
 	// allocate a bit more memory
 	A->mem_ptr = malloc(size+64);

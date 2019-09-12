@@ -37,8 +37,6 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
     // PlasmaLower
     //==============
     if (uplo == PlasmaLower) {
-        fprintf(stderr,"before malloc\n");
-//        double *ptr = malloc(A.gmt*A.mb*sizeof(double)); //do we need to use dA for other opertations too?
 		double *ptr = A.vector;
         
         for (int k = 0; k < A.mt; k++)
@@ -67,7 +65,6 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
                 int ldam = plasma_tile_mmain(A, m);
 
                 struct blasfeo_dmat sA2;
-                fprintf(stderr, "before create dmat1\n");
                 blasfeo_create_dmat(ldam, sdak, &sA2, A(m,k));
 
 #if 1
@@ -89,7 +86,6 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
                 blasfeo_create_dmat(ldam, sdak, &sA2, A(m,k));
                 blasfeo_create_dmat(ldam, sdam, &sA3, A(m,m));
 
-                printf("before dsyrk\n");
 #if 1
                 plasma_core_omp_dsyrk_blasfeo(
                     PlasmaLower, PlasmaNoTrans,
@@ -119,8 +115,6 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
                 }
             }
         }
-//end:
-//        free(ptr);
     }
     //==============
     // PlasmaUpper
