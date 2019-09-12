@@ -13,6 +13,7 @@
 #include <plasma_core_blas.h>
 #include "plasma_types.h"
 #include "core_lapack.h"
+#include "blasfeo_d_aux.h"
 
 /***************************************************************************//**
  *
@@ -54,32 +55,39 @@
 __attribute__((weak))
 int plasma_core_dpotrf_blasfeo(plasma_enum_t uplo,
                  int n,
-                 struct blasfeo_dmat *sA, int lda)
+                 struct blasfeo_dmat *sA, int ai, int aj)
 {
     // return LAPACKE_dpotrf_work(LAPACK_COL_MAJOR,
     //                            lapack_const(uplo),
     //                            n,
     //                            A, lda);
-    blasfeo_dpotrf_l(n, sA, 0, 0, sA, 0, 0);
+    fprintf(stderr, "before blasfeo dpotrf ai: %d aj: %d\n", ai, aj);
+    blasfeo_dpotrf_l(n, sA, ai, aj, sA, ai, aj);
     return 0;
 }
 
 /******************************************************************************/
 void plasma_core_omp_dpotrf_blasfeo(plasma_enum_t uplo,
                      int n,
-                     struct blasfeo_dmat *sA, int lda,
+                     struct blasfeo_dmat *sA, int ai, int aj,
                      int iinfo,
                      plasma_sequence_t *sequence, plasma_request_t *request)
 {
     // make a local copy of the structure, such that the orignal one can be safely destroyed when out of scope
 	struct blasfeo_dmat sA2;
     sA2 = *sA;
-    #pragma omp task depend(inout:A[0:lda*n])
+
+    double *A = sA->pA;
+    int sda = sA->cn;
+
+    // #pragma omp task depend(inout:A[0:lda*n])
+    #pragma omp task depend(inout:A[0:sda*n])
     {
         if (sequence->status == PlasmaSuccess) {
+            fprintf(stderr, "before core dpotrf2\n");
             int info = plasma_core_dpotrf_blasfeo(uplo,
                                    n,
-                                   &sA2, lda);
+                                   &sA2, ai, aj);
             if (info != 0)
                 plasma_request_fail(sequence, request, iinfo+info);
         }

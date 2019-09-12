@@ -13,6 +13,7 @@
 #include <plasma_core_blas.h>
 #include "plasma_types.h"
 #include "core_lapack.h"
+#include "blasfeo_d_aux.h"
 
 /***************************************************************************//**
  *
@@ -73,22 +74,23 @@
 __attribute__((weak))
 void plasma_core_dsyrk_blasfeo(plasma_enum_t uplo, plasma_enum_t trans,
                 int n, int k,
-                double alpha, const double *A, int lda,
-                double beta,        double *C, int ldc)
+                double alpha, struct blasfeo_dmat *sA, int ai, int aj,
+                double beta,  struct blasfeo_dmat *sC, int ci, int cj)
 {
-    cblas_dsyrk(CblasColMajor,
-                (CBLAS_UPLO)uplo, (CBLAS_TRANSPOSE)trans,
-                n, k,
-                (alpha), A, lda,
-                (beta),  C, ldc);
+    // cblas_dsyrk(CblasColMajor,
+    //             (CBLAS_UPLO)uplo, (CBLAS_TRANSPOSE)trans,
+    //             n, k,
+    //             (alpha), A, lda,
+    //             (beta),  C, ldc);
+    blasfeo_dsyrk_ln(n, k, alpha, sA, ai, aj, sA, ai, aj, beta, sC, ci, cj, sC, ci, cj);
 }
 
 /******************************************************************************/
 void plasma_core_omp_dsyrk_blasfeo(
     plasma_enum_t uplo, plasma_enum_t trans,
     int n, int k,
-    double alpha, const double *A, int lda,
-    double beta,        double *C, int ldc,
+    double alpha, struct blasfeo_dmat *sA, int ai, int aj,
+    double beta,  struct blasfeo_dmat *sC, int ci, int cj,
     plasma_sequence_t *sequence, plasma_request_t *request)
 {
     int ak;
@@ -97,13 +99,24 @@ void plasma_core_omp_dsyrk_blasfeo(
     else
         ak = n;
 
-    #pragma omp task depend(in:A[0:lda*ak]) \
-                     depend(inout:C[0:ldc*n])
+	struct blasfeo_dmat sA2, sC2;
+    sA2 = *sA;
+	sC2 = *sC;
+
+    double *A = sA->pA;
+	int sda = sA->cn;
+	double *C = sC->pA;
+	int sdc = sC->cn;
+
+    // #pragma omp task depend(in:A[0:lda*ak]) \
+    //                  depend(inout:C[0:ldc*n])
+    #pragma omp task depend(in:A[0:sda*ak]) \
+                     depend(inout:C[0:sdc*n])
     {
         if (sequence->status == PlasmaSuccess)
             plasma_core_dsyrk_blasfeo(uplo, trans,
                        n, k,
-                       alpha, A, lda,
-                       beta,  C, ldc);
+                       alpha, &sA2, ai, aj,
+                       beta,  &sC2, ci, cj);
     }
 }

@@ -173,7 +173,17 @@ int plasma_desc_triangular_create(plasma_enum_t precision, plasma_enum_t uplo, i
     int mnt = (ln1*(1+lm1))/2;
     size_t size = (size_t)(mnt*mb*nb + (lm * (ln%nb)))*
                   plasma_element_size(A->precision);
+    #ifdef HAVE_BLASFEO_API
+	// allocate a bit more memory
+	A->mem_ptr = malloc(size+64);
+	// align to cache line boundaries (64 bytes)
+	size_t s_ptr = (size_t) A->mem_ptr;
+	s_ptr = (s_ptr+63)/64*64;
+    A->matrix = (void *) s_ptr;
+//	printf("\n%p %p\n", A->mem_ptr, A->matrix);
+#else
     A->matrix = malloc(size);
+#endif
     if (A->matrix == NULL) {
         plasma_error("malloc() failed");
         return PlasmaErrorOutOfMemory;
