@@ -84,9 +84,11 @@ void plasma_core_omp_dpotrf_blasfeo(plasma_enum_t uplo,
 
     double *A = sA->pA;
     int sda = sA->cn;
+	double *dA = sA->dA;
 
     // #pragma omp task depend(inout:A[0:lda*n])
-    #pragma omp task depend(inout:A[0:(sA->pm)*(sA->cn)])
+    #pragma omp task depend(inout:A[0:(sA->pm)*(sA->cn)]) \
+                     depend(inout:dA[0:n])
     {
         if (sequence->status == PlasmaSuccess) {
             fprintf(stderr, "before core dpotrf2\n");

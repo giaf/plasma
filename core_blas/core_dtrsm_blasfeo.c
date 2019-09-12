@@ -123,12 +123,14 @@ void plasma_core_omp_dtrsm_blasfeo(
 
     double *A = sA->pA;
 	int sda = sA->cn;
+	double *dA = sA->dA;
 	double *B = sB->pA;
 	int sdb = sB->cn;
 
     // #pragma omp task depend(in:A[0:lda*ak]) \
     //                  depend(inout:B[0:ldb*n])
     #pragma omp task depend(in:A[0:(sA->pm)*(sA->cn)]) \
+                     depend(in:dA[0:ak]) \
                      depend(inout:B[0:(sB->pm)*(sB->cn)])
     {
         if (sequence->status == PlasmaSuccess)
