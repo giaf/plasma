@@ -110,8 +110,8 @@ void plasma_core_omp_dsyrk_blasfeo(
 
     // #pragma omp task depend(in:A[0:lda*ak]) \
     //                  depend(inout:C[0:ldc*n])
-    #pragma omp task depend(in:A[0:sda*ak]) \
-                     depend(inout:C[0:sdc*n])
+    #pragma omp task depend(in:A[0:(sA->pm)*(sA->cn)]) \
+                     depend(inout:C[0:(sC->pm)*(sC->cn)])
     {
         if (sequence->status == PlasmaSuccess)
             plasma_core_dsyrk_blasfeo(uplo, trans,

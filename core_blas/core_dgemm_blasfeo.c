@@ -225,9 +225,9 @@ void plasma_core_omp_dgemm_blasfeo(
 //                     depend(in:B[0:ldb*bk]) \
 //                     depend(inout:C[0:ldc*n])
 	// TODO this should be checked in case of ai,aj!=0
-    #pragma omp task depend(in:A[0:am*sda]) \
-                     depend(in:B[0:bk*sdb]) \
-                     depend(inout:C[0:m*sdc])
+    #pragma omp task depend(in:A[0:(sA->pm)*(sA->cn)]) \
+                     depend(in:B[0:(sB->pm)*(sB->cn)]) \
+                     depend(inout:C[0:(sC->pm)*(sC->cn)])
     {
         if (sequence->status == PlasmaSuccess)
             plasma_core_dgemm_blasfeo(transa, transb,

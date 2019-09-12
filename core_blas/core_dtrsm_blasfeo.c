@@ -99,7 +99,12 @@ void plasma_core_dtrsm_blasfeo(plasma_enum_t side, plasma_enum_t uplo,
     //             (alpha), A, lda,
     //                                 B, ldb);
 	// TODO add checks for all unsupported variants !!!!!!!!!!!!!
+//    fprintf(stderr, "before blasfeo dtrsm\n");
+//	blasfeo_print_dmat(n, n, sA, ai, aj);
+//	blasfeo_print_dmat(m, n, sB, bi, bj);
     blasfeo_dtrsm_rltn(m, n, alpha, sA, ai, aj, sB, bi, bj, sB, bi, bj);
+//	blasfeo_print_dmat(m, n, sB, bi, bj);
+//    fprintf(stderr, "after blasfeo dtrsm\n");
 }
 
 /******************************************************************************/
