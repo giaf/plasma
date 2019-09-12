@@ -51,7 +51,7 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
             struct blasfeo_dmat sA1;
             blasfeo_create_dmat(ldak, sdak, &sA1, A(k,k));
             sA1.dA = ptr + k*A.nb; // TODO map vector 1-to-1 to the single tiles in the same order
-            printf("before core dpotrf\n");
+			sA1.use_dA = mvak;
 #if 1
             plasma_core_omp_dpotrf_blasfeo(
                 PlasmaLower, mvak,
@@ -59,7 +59,6 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
                 A.nb*k,
                 sequence, request);
 #endif
-            printf("after core dpotrf\n");
 //goto end;
 
             for (int m = k+1; m < A.mt; m++)
@@ -71,7 +70,6 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
                 fprintf(stderr, "before create dmat1\n");
                 blasfeo_create_dmat(ldam, sdak, &sA2, A(m,k));
 
-                printf("before dtrsm\n");
 #if 1
                 plasma_core_omp_dtrsm_blasfeo(
                     PlasmaRight, PlasmaLower,
@@ -81,7 +79,6 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
                          &sA2, 0, 0,
                     sequence, request);
 #endif
-                printf("after dtrsm\n");
             }
             for (int m = k+1; m < A.mt; m++) {
                 int mvam = plasma_tile_mview(A, m);
