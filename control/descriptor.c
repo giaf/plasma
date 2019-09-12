@@ -41,15 +41,18 @@ int plasma_desc_general_create(plasma_enum_t precision, int mb, int nb,
     }
     // Allocate the matrix.
 	// XXX allocates extra memory for cache size alignment
-    size_t size = (size_t)A->gm*A->gn*
-                  plasma_element_size(A->precision);
+	// XXX this assumes block size to be multiple of blasfeo panel size
+    size_t size = (size_t) A->gm*A->gn*plasma_element_size(A->precision);
 #ifdef HAVE_BLASFEO_API
+	// add size for vector
+	size += A->gmt*A->gnt*A->nb*plasma_element_size(A->precision);
 	// allocate a bit more memory
 	A->mem_ptr = malloc(size+64);
 	// align to cache line boundaries (64 bytes)
 	size_t s_ptr = (size_t) A->mem_ptr;
 	s_ptr = (s_ptr+63)/64*64;
-    A->matrix = (void *) s_ptr;
+    A->matrix = (void *) (s_ptr);
+	A->vector = (void *) (s_ptr + A->gm*A->gn*plasma_element_size(A->precision));
 //	printf("\n%p %p\n", A->mem_ptr, A->matrix);
 #else
     A->matrix = malloc(size);
@@ -168,18 +171,24 @@ int plasma_desc_triangular_create(plasma_enum_t precision, plasma_enum_t uplo, i
         return PlasmaErrorIllegalValue;
     }
     // Allocate the matrix.
-    int lm1 = lm/mb;
-    int ln1 = ln/nb;
+	int tmp_lm = A->gm;
+	int tmp_ln = A->gn;
+    int lm1 = tmp_lm/mb;
+    int ln1 = tmp_ln/nb;
     int mnt = (ln1*(1+lm1))/2;
-    size_t size = (size_t)(mnt*mb*nb + (lm * (ln%nb)))*
-                  plasma_element_size(A->precision);
-    #ifdef HAVE_BLASFEO_API
+	// XXX this assumes block size to be multiple of blasfeo panel size ???
+    size_t size = (size_t) (mnt*mb*nb + (tmp_lm * (tmp_ln%nb)))*plasma_element_size(A->precision);
+#ifdef HAVE_BLASFEO_API
+	// add size for vector
+	printf("\nsize vector %d %d %d\n", A->gmt, A->gnt, A->nb);
+	size += A->gmt*A->gnt*A->nb*plasma_element_size(A->precision);
 	// allocate a bit more memory
 	A->mem_ptr = malloc(size+64);
 	// align to cache line boundaries (64 bytes)
 	size_t s_ptr = (size_t) A->mem_ptr;
 	s_ptr = (s_ptr+63)/64*64;
-    A->matrix = (void *) s_ptr;
+    A->matrix = (void *) (s_ptr);
+	A->vector = (void *) (s_ptr + (mnt*mb*nb + (tmp_lm * (tmp_ln%nb)))*plasma_element_size(A->precision));
 //	printf("\n%p %p\n", A->mem_ptr, A->matrix);
 #else
     A->matrix = malloc(size);
@@ -311,6 +320,17 @@ int plasma_desc_triangular_init(plasma_enum_t precision, plasma_enum_t uplo, voi
     A->precision = precision;
 
     // pointer and offsets
+#ifdef HAVE_BLASFEO_API
+	// TODO assumes double precision !!!
+    A->gm = (lm+D_PS-1)/D_PS*D_PS;
+    A->gn = (ln+D_PS-1)/D_PS*D_PS;
+	lm = A->gm;
+	ln = A->gn;
+#else
+    A->gm = lm;
+    A->gn = ln;
+#endif
+
     int lm1 = lm/mb;
     int ln1 = ln/nb;
     int mnt = (ln1*(1+lm1))/2;
@@ -322,10 +342,6 @@ int plasma_desc_triangular_init(plasma_enum_t precision, plasma_enum_t uplo, voi
     // tile parameters
     A->mb = mb;
     A->nb = nb;
-
-    // main matrix parameters
-    A->gm = lm;
-    A->gn = ln;
 
     A->gmt = (lm%mb == 0) ? (lm/mb) : (lm/mb+1);
     A->gnt = (ln%nb == 0) ? (ln/nb) : (ln/nb+1);

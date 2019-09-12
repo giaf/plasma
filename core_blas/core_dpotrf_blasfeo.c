@@ -61,8 +61,13 @@ int plasma_core_dpotrf_blasfeo(plasma_enum_t uplo,
     //                            lapack_const(uplo),
     //                            n,
     //                            A, lda);
+	// TODO add checks for all unsupported variants !!!!!!!!!!!!!
     fprintf(stderr, "before blasfeo dpotrf ai: %d aj: %d\n", ai, aj);
+	blasfeo_print_dmat(n, n, sA, ai, aj);
     blasfeo_dpotrf_l(n, sA, ai, aj, sA, ai, aj);
+	blasfeo_print_dmat(n, n, sA, ai, aj);
+    fprintf(stderr, "after blasfeo dpotrf ai: %d aj: %d\n", ai, aj);
+	// TODO check dA to compute return value
     return 0;
 }
 
@@ -81,15 +86,17 @@ void plasma_core_omp_dpotrf_blasfeo(plasma_enum_t uplo,
     int sda = sA->cn;
 
     // #pragma omp task depend(inout:A[0:lda*n])
-    #pragma omp task depend(inout:A[0:sda*n])
+    #pragma omp task depend(inout:A[0:(sA->pm)*(sA->cn)])
     {
         if (sequence->status == PlasmaSuccess) {
             fprintf(stderr, "before core dpotrf2\n");
-            int info = plasma_core_dpotrf_blasfeo(uplo,
-                                   n,
-                                   &sA2, ai, aj);
+            int info = plasma_core_dpotrf_blasfeo(uplo, n, &sA2, ai, aj);
+            fprintf(stderr, "after core dpotrf2 info %d\n", info);
             if (info != 0)
                 plasma_request_fail(sequence, request, iinfo+info);
+	fprintf(stderr, "exit core dpotrf2\n");
         }
+	fprintf(stderr, "exit core dpotrf2\n");
     }
+	fprintf(stderr, "exit core dpotrf2\n");
 }

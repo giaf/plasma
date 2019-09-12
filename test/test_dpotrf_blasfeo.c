@@ -40,6 +40,8 @@
  ******************************************************************************/
 void test_dpotrf_blasfeo(param_value_t param[], bool run)
 {
+//	omp_set_num_threads(1);
+	omp_set_num_threads(2);
     //================================================================
     // Mark which parameters are used.
     //================================================================
@@ -111,7 +113,15 @@ void test_dpotrf_blasfeo(param_value_t param[], bool run)
     // Run and time PLASMA.
     //================================================================
     plasma_time_t start = omp_get_wtime();
+
+	d_print_mat(n, n, A, lda);
+
+	printf("\nbefore main call\n");
     int plainfo = plasma_dpotrf_blasfeo(uplo, n, A, lda);
+	printf("\nafter main call\n");
+
+	d_print_mat(n, n, A, lda);
+
     plasma_time_t stop = omp_get_wtime();
     plasma_time_t time = stop-start;
 

@@ -141,7 +141,7 @@ int plasma_dpotrf_blasfeo(plasma_enum_t uplo,
         plasma_omp_dpotrf_blasfeo(uplo, A, &sequence, &request);
 
         // Translate back to LAPACK layout.
-        // printf("before detiling\n");
+        fprintf(stderr, "before detiling\n");
         plasma_omp_ddesc2tr_blasfeo(A, pA, lda, &sequence, &request);
         // d_print_mat(n,n,pA,lda);
     }

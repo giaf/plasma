@@ -98,6 +98,7 @@ void plasma_core_dtrsm_blasfeo(plasma_enum_t side, plasma_enum_t uplo,
     //             m, n,
     //             (alpha), A, lda,
     //                                 B, ldb);
+	// TODO add checks for all unsupported variants !!!!!!!!!!!!!
     blasfeo_dtrsm_rltn(m, n, alpha, sA, ai, aj, sB, bi, bj, sB, bi, bj);
 }
 
@@ -127,8 +128,8 @@ void plasma_core_omp_dtrsm_blasfeo(
 
     // #pragma omp task depend(in:A[0:lda*ak]) \
     //                  depend(inout:B[0:ldb*n])
-    #pragma omp task depend(in:A[0:sda*ak]) \
-                     depend(inout:B[0:sdb*n])
+    #pragma omp task depend(in:A[0:(sA->pm)*(sA->cn)]) \
+                     depend(inout:B[0:(sB->pm)*(sB->cn)])
     {
         if (sequence->status == PlasmaSuccess)
             plasma_core_dtrsm_blasfeo(side, uplo,

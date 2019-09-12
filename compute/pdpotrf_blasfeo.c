@@ -38,9 +38,11 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
     //==============
     if (uplo == PlasmaLower) {
         fprintf(stderr,"before malloc\n");
-        double *ptr = malloc(A.gmt*A.mb*sizeof(double)); //do we need to use dA for other opertations too?
+//        double *ptr = malloc(A.gmt*A.mb*sizeof(double)); //do we need to use dA for other opertations too?
+		double *ptr = A.vector;
         
-        for (int k = 0; k < A.mt; k++) {
+        for (int k = 0; k < A.mt; k++)
+		{
             int mvak = plasma_tile_mview(A, k);
             int ldak = plasma_tile_mmain(A, k);
             int sdak = plasma_tile_nmain(A, k);
@@ -48,30 +50,38 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
             // create blasfeo matrix
             struct blasfeo_dmat sA1;
             blasfeo_create_dmat(ldak, sdak, &sA1, A(k,k));
-            sA1.dA = ptr + k*A.mb;
+            sA1.dA = ptr + k*A.nb; // TODO map vector 1-to-1 to the single tiles in the same order
             printf("before core dpotrf\n");
-            // plasma_core_omp_dpotrf_blasfeo(
-            //     PlasmaLower, mvak,
-            //     &sA1, 0, 0,
-            //     A.nb*k,
-            //     sequence, request);
+#if 1
+            plasma_core_omp_dpotrf_blasfeo(
+                PlasmaLower, mvak,
+                &sA1, 0, 0,
+                A.nb*k,
+                sequence, request);
+#endif
+            printf("after core dpotrf\n");
+//goto end;
 
-            for (int m = k+1; m < A.mt; m++) {
+            for (int m = k+1; m < A.mt; m++)
+			{
                 int mvam = plasma_tile_mview(A, m);
                 int ldam = plasma_tile_mmain(A, m);
 
                 struct blasfeo_dmat sA2;
-                fprintf(stderr, "before create dmat1");
+                fprintf(stderr, "before create dmat1\n");
                 blasfeo_create_dmat(ldam, sdak, &sA2, A(m,k));
 
                 printf("before dtrsm\n");
+#if 1
                 plasma_core_omp_dtrsm_blasfeo(
                     PlasmaRight, PlasmaLower,
                     PlasmaConjTrans, PlasmaNonUnit,
                     mvam, A.mb,
-                    1.0, &sA1, ldak,
-                         &sA2, ldam,
+                    1.0, &sA1, 0, 0,
+                         &sA2, 0, 0,
                     sequence, request);
+#endif
+                printf("after dtrsm\n");
             }
             for (int m = k+1; m < A.mt; m++) {
                 int mvam = plasma_tile_mview(A, m);
@@ -83,12 +93,14 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
                 blasfeo_create_dmat(ldam, sdam, &sA3, A(m,m));
 
                 printf("before dsyrk\n");
-                plasma_core_omp_dsyrk(
+#if 1
+                plasma_core_omp_dsyrk_blasfeo(
                     PlasmaLower, PlasmaNoTrans,
                     mvam, A.mb,
-                    -1.0, &sA2, ldam,
-                     1.0, &sA3, ldam,
+                    -1.0, &sA2, 0, 0,
+                     1.0, &sA3, 0, 0,
                     sequence, request);
+#endif
 
                 for (int n = k+1; n < m; n++) {
                     int ldan = plasma_tile_mmain(A, n);
@@ -98,6 +110,7 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
                     blasfeo_create_dmat(ldan, sdak, &sA4, A(n,k));
                     blasfeo_create_dmat(mvam, sdan, &sA5, A(m,n));
 
+#if 1
                     plasma_core_omp_dgemm_blasfeo(
                         PlasmaNoTrans, PlasmaConjTrans,
                         mvam, A.mb, A.mb,
@@ -105,10 +118,12 @@ void plasma_pdpotrf_blasfeo(plasma_enum_t uplo, plasma_desc_t A,
                               &sA4, 0, 0,
                          1.0, &sA5, 0, 0,
                         sequence, request);
+#endif
                 }
             }
         }
-        free(ptr);
+//end:
+//        free(ptr);
     }
     //==============
     // PlasmaUpper

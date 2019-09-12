@@ -119,20 +119,41 @@ void plasma_core_dgemm_blasfeo(plasma_enum_t transa, plasma_enum_t transb,
 //	blasfeo_dgemm_nn(m, n, k, alpha, &sA, 0, 0, &sB, 0, 0, beta, &sC, 0, 0, &sC, 0, 0);
 	// TODO fix 'n'
     //printf("\nstart of core dgemm");
-	if(transa == PlasmaNoTrans && transb == PlasmaNoTrans){
-		blasfeo_dgemm_nn(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sC, ci, cj);
+	if(transa == PlasmaNoTrans)
+	{
+		if(transb == PlasmaNoTrans)
+		{
+			blasfeo_dgemm_nn(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sC, ci, cj);
+		}
+		else if(transb == PlasmaTrans | transb == PlasmaConjTrans)
+		{
+			blasfeo_dgemm_nt(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sC, ci, cj);
+		}
+		else
+		{
+			// TODO complain and exit or something like that
+		}
 	}
-	else if(transa == PlasmaNoTrans && transb == PlasmaTrans) {
-        // printf("called blasfeo_dgemm_nt\n");
-		blasfeo_dgemm_nt(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sC, ci, cj);
+	else if(transa == PlasmaTrans | transa == PlasmaConjTrans)
+	{
+		if(transb == PlasmaNoTrans)
+		{
+			blasfeo_dgemm_tn(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sC, ci, cj);
+		}
+		else if(transb == PlasmaTrans | transb == PlasmaConjTrans)
+		{
+			blasfeo_dgemm_tt(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sC, ci, cj);
+		}
+		else
+		{
+			// TODO complain and exit or something like that
+		}
 	}
-    else if(transa == PlasmaTrans && transb == PlasmaNoTrans){
-        blasfeo_dgemm_tn(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sC, ci, cj);
-    }
-    else if(transa == PlasmaTrans && transb == PlasmaTrans){
-        // printf("\nboth arrays transposed");
-        blasfeo_dgemm_tt(m, n, k, alpha, sA, ai, aj, sB, bi, bj, beta, sC, ci, cj, sC, ci, cj);
-    }
+	else
+	{
+		// TODO complain and exit or something like that
+	}
+	
 //printf("\nafter dgemm\n");
 //	blasfeo_print_dmat(m, n, &sC, 0, 0);
 #else

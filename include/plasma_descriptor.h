@@ -46,6 +46,7 @@ typedef struct {
     // pointer and offsets
 #ifdef HAVE_BLASFEO_API
 	void *mem_ptr; ///< store the pointer from malloc
+	void *vector; ///< pointer to the beginning of the blasfeo internal vector dA
 #endif
     void *matrix; ///< pointer to the beginning of the matrix
     size_t A21;   ///< pointer to the beginning of A21
