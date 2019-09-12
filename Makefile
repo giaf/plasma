@@ -112,11 +112,27 @@ plasma_obj += compute/dge2desc_blasfeo.o
 plasma_obj += compute/pdge2desc_blasfeo.o
 plasma_obj += compute/ddesc2ge_blasfeo.o
 plasma_obj += compute/pddesc2ge_blasfeo.o
+
+plasma_obj += compute/dpotrf_blasfeo.o
+plasma_obj += compute/pdpotrf_blasfeo.o
+plasma_obj += compute/dtr2desc_blasfeo.o
+plasma_obj += compute/pdtr2desc_blasfeo.o
+plasma_obj += compute/ddesc2tr_blasfeo.o
+plasma_obj += compute/pddesc2tr_blasfeo.o
+
 #plasma_obj += compute/dprint_blasfeo.o
 coreblas_obj += core_blas/core_dgemm_blasfeo.o
 coreblas_obj += core_blas/core_dpack_blasfeo.o
 coreblas_obj += core_blas/core_dunpack_blasfeo.o
+
+coreblas_obj += core_blas/core_dpotrf_blasfeo.o
+coreblas_obj += core_blas/core_dsyrk_blasfeo.o
+coreblas_obj += core_blas/core_dtrsm_blasfeo.o
+
+
 test_obj += test/test_dgemm_blasfeo.o
+
+test_obj += test/test_dpotrf_blasfeo.o
 
 test_exe     := test/test
 

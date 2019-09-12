@@ -132,13 +132,18 @@ int plasma_dpotrf_blasfeo(plasma_enum_t uplo,
     {
         // Translate to tile layout.
         //
+        // d_print_mat(n,n,pA,lda);
+        fprintf(stderr, "before tiling\n");
         plasma_omp_dtr2desc_blasfeo(pA, lda, A, &sequence, &request);
 
         // Call the tile async function.
+        fprintf(stderr, "before dpotrf\n");
         plasma_omp_dpotrf_blasfeo(uplo, A, &sequence, &request);
 
         // Translate back to LAPACK layout.
+        // printf("before detiling\n");
         plasma_omp_ddesc2tr_blasfeo(A, pA, lda, &sequence, &request);
+        // d_print_mat(n,n,pA,lda);
     }
     // implicit synchronization
 

@@ -29,10 +29,11 @@ void plasma_pdtr2desc_blasfeo(double *pA, int lda,
         return;
 
     for (int m = 0; m < A.mt; m++) {
-        int ldt = plasma_tile_mmain(A, m);
+        
         int n_start = (A.type == PlasmaUpper ? m : 0);
         int n_end   = (A.type == PlasmaUpper ? A.nt : m+1);
         for (int n = n_start; n < n_end; n++) {
+            int ldt = plasma_tile_nmain(A, n);
             int x1 = n == 0 ? A.j%A.nb : 0;
             int y1 = m == 0 ? A.i%A.mb : 0;
             int x2 = n == A.nt-1 ? (A.j+A.n-1)%A.nb+1 : A.nb;
@@ -41,6 +42,8 @@ void plasma_pdtr2desc_blasfeo(double *pA, int lda,
             double *f77 = &pA[(size_t)A.nb*lda*n + (size_t)A.mb*m];
             double *bdl = (double*)plasma_tile_addr(A, m, n);
 
+            // printf("x1:%d y1:%d x2:%d y2:%d\n", x1, y1, x2, y2);
+            // fprintf(stderr, "before dpack m:%d n:%d A.mt:%d A.nt:%d\n", m, n, A.mt, A.nt);
             plasma_core_omp_dpack_blasfeo(PlasmaGeneral, PlasmaNoTrans,
                             y2-y1, x2-x1,
                             &(f77[x1*lda+y1]), lda,
